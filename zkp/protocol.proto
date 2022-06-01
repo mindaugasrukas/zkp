@@ -9,6 +9,7 @@ message RegisterRequest {
         bytes y1 = 1;
         bytes y2 = 2;
     }
+    repeated Commits commits = 2;
 }
 
 message AuthRequest {
@@ -18,6 +19,7 @@ message AuthRequest {
         bytes r1 = 1;
         bytes r2 = 2;
     }
+    repeated Commits commits = 2;
 }
 
 message ChallengeResponse {
