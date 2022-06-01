@@ -14,6 +14,10 @@ type Verifier struct {
 	challenge Challenge
 }
 
+func NewVerifier() *Verifier {
+	return &Verifier{}
+}
+
 // CreateAuthenticationChallenge Creates a challenge that the client has to answer
 func (v *Verifier) CreateAuthenticationChallenge(authRequest AuthenticationRequest) (Challenge, error) {
 	b := make([]byte, 1)

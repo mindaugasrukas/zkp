@@ -1,0 +1,18 @@
+syntax="proto3";
+option go_package = "./gen/zkp_pb";
+package zkp_pb;
+
+message RegisterRequest {
+    string user = 1;
+
+    message Commits {
+        bytes y1 = 1;
+        bytes y2 = 2;
+    }
+    repeated Commits commits = 2;
+}
+
+message RegisterResponse {
+    bool results = 1;
+    // todo: add errors
+}
