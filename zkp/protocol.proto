@@ -1,0 +1,30 @@
+syntax="proto3";
+option go_package = "./";
+
+package zkp;
+
+message RegisterRequest {
+    string user = 1;
+
+    message Commits {
+        bytes y1 = 1;
+        bytes y2 = 2;
+    }
+}
+
+message AuthRequest {
+    string user = 1;
+
+    message Commits {
+        bytes r1 = 1;
+        bytes r2 = 2;
+    }
+}
+
+message ChallengeResponse {
+    bytes Challenge = 1;
+}
+
+message AnswerRequest {
+    bytes Answer = 1;
+}
