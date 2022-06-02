@@ -1,5 +1,6 @@
 package main
 
 func main() {
-	panic("not implemented")
+	server := NewServer()
+	server.Run("8080")
 }

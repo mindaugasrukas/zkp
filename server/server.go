@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 	"net"
 
@@ -31,12 +33,100 @@ type (
 	}
 )
 
+var (
+	WrongRequestError   = errors.New("wrong request")
+	UnknownRequestError = errors.New("unknown request")
+)
+
 // NewServer returns a new server instance
 func NewServer() *Server {
 	return &Server{
 		registry: store.NewInMemoryStore(),
 		verifier: zkp.NewVerifier(),
 	}
+}
+
+// Run starts the server
+func (s *Server) Run(port string) {
+	l, err := net.Listen("tcp", ":" + port)
+	if err != nil {
+		// Can't start - panic
+		panic(err.Error())
+	}
+	defer l.Close()
+
+	// run infinite loop
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			// log the error and continue
+			fmt.Println(err.Error())
+		}
+
+		go func(conn net.Conn) {
+			defer conn.Close()
+			if err := s.serve(conn); err != nil {
+				// log the error and continue
+				fmt.Println(err.Error())
+			}
+		}(conn)
+	}
+}
+
+func (s *Server) serve(conn net.Conn) error {
+	in := make([]byte, 0)
+	if _, err := conn.Read(in); err != nil {
+		return err
+	}
+	registerRequest := &zkp_pb.RegisterRequest{}
+	if err := proto.Unmarshal(in, registerRequest); err == nil {
+		return s.serveRegistration(registerRequest)
+	}
+	authRequest := &zkp_pb.AuthRequest{}
+	if err := proto.Unmarshal(in, authRequest); err == nil {
+		return s.serveAuth(conn, authRequest)
+	}
+	return UnknownRequestError
+}
+
+func (s *Server) serveRegistration(registerRequest *zkp_pb.RegisterRequest) error {
+	if len(registerRequest.GetCommits()) == 0 {
+		// todo: wrong request
+		return WrongRequestError
+	}
+
+	c := registerRequest.GetCommits()[0]
+
+	var y1, y2 big.Int
+	y1.SetBytes(c.GetY1())
+	y2.SetBytes(c.GetY2())
+
+	commits := &zkp.Commits{
+		Y1: &y1,
+		Y2: &y2,
+	}
+	user := zkp.UUID(registerRequest.GetUser())
+	return s.Register(user, commits)
+}
+
+func (s *Server) serveAuth(conn net.Conn, authRequest *zkp_pb.AuthRequest) error {
+	if len(authRequest.GetCommits()) == 0 {
+		// todo: wrong request
+		return WrongRequestError
+	}
+
+	c := authRequest.GetCommits()[0]
+
+	var r1, r2 big.Int
+	r1.SetBytes(c.GetR1())
+	r2.SetBytes(c.GetR2())
+
+	user := zkp.UUID(authRequest.GetUser())
+	auth := zkp.AuthenticationRequest{
+		R1: &r1,
+		R2: &r2,
+	}
+	return s.Authenticate(conn, user, auth)
 }
 
 // Register Registers a new user
