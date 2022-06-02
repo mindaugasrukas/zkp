@@ -1,4 +1,4 @@
-package server
+package store
 
 import (
 	"errors"
@@ -12,32 +12,29 @@ var (
 )
 
 type (
-	Data struct {
-		commits zkp.Commits
-	}
 	InMemoryStore struct {
-		store map[zkp.UUID]*Data
+		store map[zkp.UUID]*zkp.Commits
 	}
 )
 
 // NewInMemoryStore returns a new store
 func NewInMemoryStore() InMemoryStore {
 	return InMemoryStore{
-		store: make(map[zkp.UUID]*Data),
+		store: make(map[zkp.UUID]*zkp.Commits),
 	}
 }
 
 // Add user to the store
-func (m InMemoryStore) Add(user zkp.UUID, commits zkp.Commits) error {
+func (m InMemoryStore) Add(user zkp.UUID, commits *zkp.Commits) error {
 	if _, ok := m.store[user]; ok {
 		return UserExistsError
 	}
-	m.store[user] = &Data{commits: commits}
+	m.store[user] = commits
 	return nil
 }
 
 // Get user data from the store
-func (m InMemoryStore) Get(user zkp.UUID) (*Data, error) {
+func (m InMemoryStore) Get(user zkp.UUID) (*zkp.Commits, error) {
 	data, ok := m.store[user]
 	if !ok {
 		return nil, UserDoesNotExistError
