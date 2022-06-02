@@ -30,6 +30,12 @@ func (v *Verifier) CreateAuthenticationChallenge(authRequest AuthenticationReque
 }
 
 // VerifyAuthentication verifies the answer received from the client against the commits
+// Verify the answer s using this formula:
+// g and h is public keys
+// c is the challenge
+// y1, y2 is client registered commits
+// r1, r2 is client authentication commits
+// r1 = g^s * y1^c  AND  r2 = h^s * y2^c
 func (v *Verifier) VerifyAuthentication(commits *Commits, authRequest AuthenticationRequest, answer Answer) bool {
 	y1 := commits.Y1
 	y2 := commits.Y2
