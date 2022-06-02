@@ -30,7 +30,7 @@ func (v *Verifier) CreateAuthenticationChallenge(authRequest AuthenticationReque
 }
 
 // VerifyAuthentication verifies the answer received from the client against the commits
-func (v *Verifier) VerifyAuthentication(commits Commits, authRequest AuthenticationRequest, answer Answer) bool {
+func (v *Verifier) VerifyAuthentication(commits *Commits, authRequest AuthenticationRequest, answer Answer) bool {
 	y1 := commits.Y1
 	y2 := commits.Y2
 

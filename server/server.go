@@ -1,10 +1,11 @@
-package server
+package main
 
 import (
 	"math/big"
 	"net"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/mindaugasrukas/zkp_example/store"
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 )
@@ -13,14 +14,14 @@ type (
 	// Registry interface
 	Registry interface {
 		// Add user data to the registry
-		Add(user zkp.UUID, commits zkp.Commits) error
+		Add(user zkp.UUID, commits *zkp.Commits) error
 		// Get user data from the registry
-		Get(user zkp.UUID) (*Data, error)
+		Get(user zkp.UUID) (*zkp.Commits, error)
 	}
 
 	Verifier interface {
 		CreateAuthenticationChallenge(authRequest zkp.AuthenticationRequest) (zkp.Challenge, error)
-		VerifyAuthentication(commits zkp.Commits, authRequest zkp.AuthenticationRequest, answer zkp.Answer) bool
+		VerifyAuthentication(commits *zkp.Commits, authRequest zkp.AuthenticationRequest, answer zkp.Answer) bool
 	}
 
 	// Server application
@@ -33,19 +34,19 @@ type (
 // NewServer returns a new server instance
 func NewServer() *Server {
 	return &Server{
-		registry: NewInMemoryStore(),
+		registry: store.NewInMemoryStore(),
 		verifier: zkp.NewVerifier(),
 	}
 }
 
 // Register Registers a new user
-func (s *Server) Register(user zkp.UUID, commits zkp.Commits) error {
+func (s *Server) Register(user zkp.UUID, commits *zkp.Commits) error {
 	return s.registry.Add(user, commits)
 }
 
 func (s *Server) Authenticate(connection net.Conn, user zkp.UUID, authRequest zkp.AuthenticationRequest) error {
-	// Get the user
-	userData, err := s.registry.Get(user)
+	// Get the user data
+	userCommits, err := s.registry.Get(user)
 	if err != nil {
 		return err
 	}
@@ -79,7 +80,7 @@ func (s *Server) Authenticate(connection net.Conn, user zkp.UUID, authRequest zk
 	var answer big.Int
 	answer.SetBytes(answerRequest.GetAnswer())
 
-	result := s.verifier.VerifyAuthentication(userData.commits, authRequest, &answer)
+	result := s.verifier.VerifyAuthentication(userCommits, authRequest, &answer)
 
 	// Send authentication results
 	authResponse := &zkp_pb.AuthResponse{
