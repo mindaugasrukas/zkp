@@ -3,3 +3,6 @@
 
 # ignore Protobuf generated files
 **/gen/
+
+# ignore build files
+build/
