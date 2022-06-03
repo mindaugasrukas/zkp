@@ -5,7 +5,6 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 	"github.com/spf13/cobra"
@@ -37,26 +36,31 @@ var registerCmd = &cobra.Command{
 		}
 
 		// connect to server
-		connection, err := net.Dial("tcp", server)
+		conn, err := net.Dial("tcp", server)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		defer connection.Close()
+		defer conn.Close()
 
 		// send request
-		out, err := proto.Marshal(request)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		if _, err = connection.Write(out); err != nil {
+		if err := zkp.SendMessage(conn, request); err != nil {
 			fmt.Println(err)
 			return
 		}
 
 		// wait for response
-		// todo:
+		var registerResponse zkp_pb.RegisterResponse
+		if err := zkp.ParseMessage(conn, &registerResponse); err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		if registerResponse.Result {
+			fmt.Println("Registration successful")
+		} else {
+			fmt.Println(registerResponse.Error)
+		}
 	},
 }
 

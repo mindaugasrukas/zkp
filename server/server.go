@@ -3,14 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io"
 	"math/big"
 	"net"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/mindaugasrukas/zkp_example/store"
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
+	"google.golang.org/protobuf/proto"
 )
 
 type (
@@ -75,21 +74,13 @@ func (s *Server) Run(port string) {
 }
 
 func (s *Server) serve(conn net.Conn) error {
-	in := make([]byte, 0, 10240)
-	tmp := make([]byte, 4096)
-	for {
-		n, err := conn.Read(tmp)
-		if err != nil {
-			if err != io.EOF {
-				return err
-			}
-			break
-		}
-		in = append(in, tmp[:n]...)
+	in, err := zkp.ReadMessage(conn)
+	if err != nil {
+		return err
 	}
 	registerRequest := &zkp_pb.RegisterRequest{}
 	if err := proto.Unmarshal(in, registerRequest); err == nil {
-		return s.serveRegistration(registerRequest)
+		return s.serveRegistration(conn, registerRequest)
 	}
 	authRequest := &zkp_pb.AuthRequest{}
 	if err := proto.Unmarshal(in, authRequest); err == nil {
@@ -98,7 +89,7 @@ func (s *Server) serve(conn net.Conn) error {
 	return UnknownRequestError
 }
 
-func (s *Server) serveRegistration(registerRequest *zkp_pb.RegisterRequest) error {
+func (s *Server) serveRegistration(conn net.Conn, registerRequest *zkp_pb.RegisterRequest) error {
 	if len(registerRequest.GetCommits()) == 0 {
 		// todo: wrong request
 		return WrongRequestError
@@ -115,13 +106,23 @@ func (s *Server) serveRegistration(registerRequest *zkp_pb.RegisterRequest) erro
 		Y2: &y2,
 	}
 	user := zkp.UUID(registerRequest.GetUser())
+	response := &zkp_pb.RegisterResponse{Result: true}
+
 	if err := s.Register(user, commits); err != nil {
-		// todo: return status to the client
+		response.Result = false
+		response.Error = err.Error()
+		if err := zkp.SendMessage(conn, response); err != nil {
+			return err
+		}
 		return fmt.Errorf("fail to register user %q: %v", user, err)
 	}
 
-	// todo: return status to the client
 	fmt.Printf("registered new user %q\n", user)
+	if err := zkp.SendMessage(conn, response); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
 	return nil
 }
 
