@@ -13,8 +13,8 @@ message AuthRequest {
 }
 
 message AuthResponse {
-    bool result = 1;
-    // todo: add errors
+    bool result = 1;   // true - success, false - failure
+    string error = 2;
 }
 
 message ChallengeResponse {

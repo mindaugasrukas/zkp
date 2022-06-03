@@ -13,6 +13,6 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-    bool results = 1;
-    // todo: add errors
+    bool result = 1;   // true - success, false - failure
+    string error = 2;
 }
