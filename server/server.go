@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
 	"net"
 
@@ -74,9 +75,17 @@ func (s *Server) Run(port string) {
 }
 
 func (s *Server) serve(conn net.Conn) error {
-	in := make([]byte, 0)
-	if _, err := conn.Read(in); err != nil {
-		return err
+	in := make([]byte, 0, 10240)
+	tmp := make([]byte, 4096)
+	for {
+		n, err := conn.Read(tmp)
+		if err != nil {
+			if err != io.EOF {
+				return err
+			}
+			break
+		}
+		in = append(in, tmp[:n]...)
 	}
 	registerRequest := &zkp_pb.RegisterRequest{}
 	if err := proto.Unmarshal(in, registerRequest); err == nil {
@@ -106,7 +115,14 @@ func (s *Server) serveRegistration(registerRequest *zkp_pb.RegisterRequest) erro
 		Y2: &y2,
 	}
 	user := zkp.UUID(registerRequest.GetUser())
-	return s.Register(user, commits)
+	if err := s.Register(user, commits); err != nil {
+		// todo: return status to the client
+		return fmt.Errorf("fail to register user %q: %v", user, err)
+	}
+
+	// todo: return status to the client
+	fmt.Printf("registered new user %q\n", user)
+	return nil
 }
 
 func (s *Server) serveAuth(conn net.Conn, authRequest *zkp_pb.AuthRequest) error {
