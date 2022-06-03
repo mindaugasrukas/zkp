@@ -8,7 +8,14 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func ReadMessage(conn net.Conn) ([]byte, error) {
+// ReadPacket reads message bytes from the TCP connection
+// Packet structure:
+// 4 bytes    | N bytes
+// -----------+--------------------------------
+// the size N | message content of the length N
+//
+// todo: add a full application packet header: version, size, type, etc.
+func ReadPacket(conn net.Conn) ([]byte, error) {
 	var size int
 	in := make([]byte, 0, 10240)
 	tmp := make([]byte, 4096)
@@ -40,9 +47,10 @@ func ReadMessage(conn net.Conn) ([]byte, error) {
 	return in, nil
 }
 
-
-func ParseMessage(conn net.Conn, msg proto.Message) error {
-	in, err := ReadMessage(conn)
+// ReadMessage reads and parses the bytes from the TCP connection into proto Message
+// todo: envelope proto messages to have a simpler message management
+func ReadMessage(conn net.Conn, msg proto.Message) error {
+	in, err := ReadPacket(conn)
 	if err != nil {
 		return err
 	}
@@ -53,6 +61,8 @@ func ParseMessage(conn net.Conn, msg proto.Message) error {
 	return nil
 }
 
+// SendMessage writes the proto Message to the TCP connection
+// for packet structure see ReadPacket
 func SendMessage(conn net.Conn, message proto.Message) error {
 	out, err := proto.Marshal(message)
 	if err != nil {

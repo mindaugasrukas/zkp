@@ -51,7 +51,7 @@ var registerCmd = &cobra.Command{
 
 		// wait for response
 		var registerResponse zkp_pb.RegisterResponse
-		if err := zkp.ParseMessage(conn, &registerResponse); err != nil {
+		if err := zkp.ReadMessage(conn, &registerResponse); err != nil {
 			fmt.Println(err)
 			return
 		}

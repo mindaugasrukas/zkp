@@ -74,7 +74,7 @@ func (s *Server) Run(port string) {
 }
 
 func (s *Server) serve(conn net.Conn) error {
-	in, err := zkp.ReadMessage(conn)
+	in, err := zkp.ReadPacket(conn)
 	if err != nil {
 		return err
 	}
