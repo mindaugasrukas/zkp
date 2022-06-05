@@ -5,7 +5,9 @@ import (
 	"io"
 	"net"
 
+	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ReadPacket reads message bytes from the TCP connection
@@ -48,23 +50,45 @@ func ReadPacket(conn net.Conn) ([]byte, error) {
 }
 
 // ReadMessage reads and parses the bytes from the TCP connection into proto Message
-// todo: envelope proto messages to have a simpler message management
-func ReadMessage(conn net.Conn, msg proto.Message) error {
+func ReadMessage(conn net.Conn) (proto.Message, error) {
 	in, err := ReadPacket(conn)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err = proto.Unmarshal(in, msg); err != nil {
-		return err
+	var envelope zkp_pb.EnvelopeMessage
+	if err = proto.Unmarshal(in, &envelope); err != nil {
+		return nil, err
 	}
-	return nil
+
+	var msg proto.Message
+
+	switch envelope.Name {
+	case "RegisterRequest": msg = &zkp_pb.RegisterRequest{}
+	case "RegisterResponse": msg = &zkp_pb.RegisterResponse{}
+	case "AuthRequest": msg = &zkp_pb.AuthRequest{}
+	case "AuthResponse": msg = &zkp_pb.AuthResponse{}
+	case "AnswerRequest": msg = &zkp_pb.AnswerRequest{}
+	case "ChallengeResponse": msg = &zkp_pb.ChallengeResponse{}
+	}
+
+	if err = envelope.Message.UnmarshalTo(msg); err != nil {
+		return nil, err
+	}
+	return msg, nil
 }
 
 // SendMessage writes the proto Message to the TCP connection
 // for packet structure see ReadPacket
 func SendMessage(conn net.Conn, message proto.Message) error {
-	out, err := proto.Marshal(message)
+	// Envelope Messages
+	any, err := anypb.New(message)
+	envelope := &zkp_pb.EnvelopeMessage{
+		Name: string(message.ProtoReflect().Descriptor().Name()),
+		Message:  any,
+	}
+
+	out, err := proto.Marshal(envelope)
 	if err != nil {
 		return err
 	}

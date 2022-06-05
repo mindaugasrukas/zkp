@@ -1,0 +1,12 @@
+syntax = "proto3";
+option go_package = "./gen/zkp_pb";
+package zkp_pb;
+import "google/protobuf/any.proto";
+
+message EnvelopeMessage {
+    // The message name
+    string name = 1;
+
+    // The message and its type, encoded as an Any message.
+    google.protobuf.Any message = 2;
+}
