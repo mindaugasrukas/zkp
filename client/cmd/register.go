@@ -8,6 +8,7 @@ import (
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var registerCmd = &cobra.Command{
@@ -65,10 +66,16 @@ var registerCmd = &cobra.Command{
 }
 
 func init() {
+	viper.AutomaticEnv()
+	flags := rootCmd.PersistentFlags()
+
 	registerCmd.PersistentFlags().StringP("username", "u", "", "username")
-	_ = registerCmd.MarkPersistentFlagRequired("username")
+	viper.BindPFlag("username", flags.Lookup("username"))
+	// todo: set required field and validate input
+
 	registerCmd.PersistentFlags().Int16P("password", "p", 0, "password")
-	_ = registerCmd.MarkPersistentFlagRequired("password")
+	viper.BindPFlag("password", flags.Lookup("password"))
+	// todo: set required field and validate input
 
 	rootCmd.AddCommand(registerCmd)
 }

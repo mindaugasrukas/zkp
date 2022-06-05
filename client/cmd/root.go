@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -18,8 +19,11 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringP("server", "s", "", "server URL")
-	_ = rootCmd.MarkPersistentFlagRequired("server")
+	viper.AutomaticEnv()
+	flags := rootCmd.PersistentFlags()
+	flags.StringP("server", "s", viper.GetString("SERVER"), "server URL (env: SERVER)")
+	viper.BindPFlag("server", flags.Lookup("server"))
+	// todo: set required field and validate input
 }
 
 func Execute() {
