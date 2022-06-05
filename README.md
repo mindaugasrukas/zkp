@@ -1,11 +1,14 @@
 # ZKP PoC
 
+Good explanation of Chaum-Pedersen Protocol
+https://crypto.stackexchange.com/questions/99262/chaum-pedersen-protocol
+
 ## Development
 
 ### Generate dependencies
 
 ```shell
-$ protoc --go_out=./zkp ./zkp/*.proto
+$ protoc --go_out=./zkp ./zkp/proto/*.proto
 ```
 
 ### Test
