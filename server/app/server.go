@@ -24,7 +24,7 @@ type (
 	// Verifier interface
 	Verifier interface {
 		CreateAuthenticationChallenge() (challenge *big.Int, err error)
-		VerifyAuthentication(commits *zkp.Commits, authRequest *zkp.Commits, answer *big.Int) bool
+		VerifyAuthentication(commits *zkp.Commits, authRequest *zkp.Commits, challenge, answer *big.Int) bool
 	}
 
 	// Server application

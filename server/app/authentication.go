@@ -78,7 +78,7 @@ func (s *Server) authenticate(connection net.Conn, user zkp.UUID, authRequest *z
 	answer.SetBytes(answerRequest.GetAnswer())
 	log.Print("answer = ", &answer)
 
-	result := s.Verifier.VerifyAuthentication(userCommits, authRequest, &answer)
+	result := s.Verifier.VerifyAuthentication(userCommits, authRequest, challenge, &answer)
 
 	// Send authentication results
 	authResponse := &zkp_pb.AuthResponse{
