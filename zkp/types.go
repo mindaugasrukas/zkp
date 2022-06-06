@@ -4,27 +4,17 @@ import "math/big"
 
 // Public information
 const (
-	G = 3
-	H = 11
-	Q = 33
+	P = 23
+	G = 4
+	H = 9
+	Q = 11
 )
 
 type (
-	// Commits is user secret commits
+	// Commits is user commitments for registration or authentication
 	Commits struct {
-		Y1, Y2 *big.Int
+		C1, C2 *big.Int
 	}
-
-	// AuthenticationRequest is user auth request
-	AuthenticationRequest struct {
-		R1, R2 *big.Int
-	}
-
-	// Challenge is server challenge
-	Challenge *big.Int
-
-	// Answer is user answer
-	Answer *big.Int
 
 	// UUID is Unique User ID
 	UUID string

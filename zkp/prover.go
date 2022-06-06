@@ -1,58 +1,69 @@
 package zkp
 
 import (
-	"crypto/rand"
-	"errors"
+	"log"
 	"math/big"
+
+	"github.com/mindaugasrukas/zkp_example/zkp/algorithm"
+	"github.com/mindaugasrukas/zkp_example/zkp/pedersen"
 )
 
-type Prover struct {
-	k *big.Int
-	password int64
-}
-
-var (
-	AuthenticationRequestError = errors.New("error creating authentication request")
+type (
+	PedersenProver struct {
+		pedersen.Prover
+	}
 )
 
-func NewProver(password int64) *Prover {
-	return &Prover{
-		password: password,
+func NewProver(password int64) *PedersenProver {
+	q := big.NewInt(Q)
+	private := &algorithm.Zr{
+		Value: big.NewInt(password),
+		Modulo: q,
+	}
+	return &PedersenProver{
+		Prover: pedersen.Prover{
+			P: big.NewInt(P),
+			Q: q,
+			G: big.NewInt(G),
+			H: big.NewInt(H),
+			X: private,
+			R: private,
+		},
 	}
 }
-
 
 // CreateRegisterCommits Creates the commits to register the user in the server
 // Having secret x and public keys g and h,
 // calculate y1 = g^x and y2 = h^x
-func (p *Prover) CreateRegisterCommits() Commits {
-	var y1, y2 big.Int
-	y1.Exp(big.NewInt(G), big.NewInt(p.password), nil)
-	y2.Exp(big.NewInt(H), big.NewInt(p.password), nil)
+func (p *PedersenProver) CreateRegisterCommits() (*Commits, error) {
+	y1 := big.NewInt(0)
+	y1.Exp(p.G, p.X.Value, p.P)
+	log.Print("g = ", p.G)
+	log.Print("g^rx = ", y1)
 
-	return Commits{
-		Y1: &y1,
-		Y2: &y2,
-	}
+	y2 := big.NewInt(0)
+	y2.Exp(p.H, p.X.Value, p.P)
+	log.Print("h = ", p.H)
+	log.Print("h^rr = ", y2)
+
+	return &Commits{
+		C1: y1,
+		C2: y2,
+	}, nil
 }
 
-// CreateAuthenticationRequest Creates an authentication request to start the authentication against the Server
+// CreateAuthenticationCommits Creates an authentication request to start the authentication against the Server
 // Generate random k and using public keys g and h,
 // calculate r1 = g^k and r2 = h^k
-func (p *Prover) CreateAuthenticationRequest() (*AuthenticationRequest, error) {
-	b := make([]byte, 1)
-	if _, err := rand.Read(b); err != nil {
-		return nil, AuthenticationRequestError
+func (p *PedersenProver) CreateAuthenticationCommits() (*Commits, error) {
+	r1, r2, err := p.Commits()
+	if err != nil {
+		return nil, err
 	}
-	p.k = big.NewInt(int64(b[0]))
 
-	var r1, r2 big.Int
-	r1.Exp(big.NewInt(G), p.k, nil)
-	r2.Exp(big.NewInt(H), p.k, nil)
-
-	return &AuthenticationRequest{
-		R1: &r1,
-		R2: &r2,
+	return &Commits{
+		C1: r1,
+		C2: r2,
 	}, nil
 }
 
@@ -60,10 +71,6 @@ func (p *Prover) CreateAuthenticationRequest() (*AuthenticationRequest, error) {
 // Having secret x and random k
 // given challenge c and using public q
 // calculate the answer s = k - c * x (mod q)
-func (p *Prover) ProveAuthentication(challenge Challenge) Answer {
-	var c, answer big.Int
-	c.Mul(challenge, big.NewInt(p.password))
-	answer.Sub(p.k, &c)
-	answer.Mod(&answer, big.NewInt(Q))
-	return &answer
+func (p *PedersenProver) ProveAuthentication(challenge *big.Int) (answer *big.Int) {
+	return p.Prove(challenge)[0]
 }

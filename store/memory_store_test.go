@@ -16,23 +16,23 @@ func TestInMemoryStore_Add(t *testing.T) {
 	// Add a new user without the error
 	user := zkp.UUID("userid-123")
 	err := registry.Add(user, &zkp.Commits{
-		Y1: big.NewInt(int64(123)),
-		Y2: big.NewInt(int64(345)),
+		C1: big.NewInt(int64(123)),
+		C2: big.NewInt(int64(345)),
 	})
 	assert.NoError(err)
 
 	// Fail to add a duplicate user
 	err = registry.Add(user, &zkp.Commits{
-		Y1: big.NewInt(int64(789)),
-		Y2: big.NewInt(int64(567)),
+		C1: big.NewInt(int64(789)),
+		C2: big.NewInt(int64(567)),
 	})
 	assert.ErrorIs(err, store.UserExistsError)
 
 	// Add a new user without the error
 	user2 := zkp.UUID("userid-789")
 	err = registry.Add(user2, &zkp.Commits{
-		Y1: big.NewInt(int64(123)),
-		Y2: big.NewInt(int64(345)),
+		C1: big.NewInt(int64(123)),
+		C2: big.NewInt(int64(345)),
 	})
 	assert.NoError(err)
 }
@@ -48,8 +48,8 @@ func TestInMemoryStore_Get(t *testing.T) {
 
 	// Add a dummy user
 	commits := &zkp.Commits{
-		Y1: big.NewInt(int64(123)),
-		Y2: big.NewInt(int64(345)),
+		C1: big.NewInt(int64(123)),
+		C2: big.NewInt(int64(345)),
 	}
 	err = registry.Add(user, commits)
 	assert.NoError(err)

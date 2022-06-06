@@ -59,12 +59,13 @@ func (z *Zr) Commit() (*big.Int, error) {
 	return z.r, nil
 }
 
+// Prove s = (k - c * x) mod Q
 func (z *Zr) Prove(c *big.Int) *big.Int {
 	if c.Cmp(z.Modulo) > 0 {
 		c.Mod(c, z.Modulo)
 	}
 
-	log.Print("c = ", c.Int64())
+	log.Print("c = ", c)
 	tmp := big.NewInt(0)
 	tmp.Mul(c, z.Value)
 	tmp.Mod(tmp, z.Modulo)
