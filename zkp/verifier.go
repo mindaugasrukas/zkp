@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/mindaugasrukas/zkp_example/zkp/algorithm"
 	"github.com/mindaugasrukas/zkp_example/zkp/pedersen"
 )
 
@@ -39,7 +38,7 @@ func (v *PedersenVerifier) CreateAuthenticationChallenge() (challenge *big.Int, 
 	if err != nil {
 		return nil, ChallengeError
 	}
-	if challenge == algorithm.ZERO {
+	if challenge.Int64() == 0 {
 		// if zero repeat
 		return v.CreateAuthenticationChallenge()
 	}

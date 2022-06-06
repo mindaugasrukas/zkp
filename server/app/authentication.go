@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"net"
@@ -28,7 +29,20 @@ func (s *Server) serveAuth(conn net.Conn, authRequest *zkp_pb.AuthRequest) error
 		C2: &r2,
 	}
 	log.Printf("r1=%v, r2=%v", &r1, &r2)
-	return s.authenticate(conn, user, &auth)
+	if err := s.authenticate(conn, user, &auth); err != nil {
+		// send error response
+		authResponse := &zkp_pb.AuthResponse{
+			Result: false,
+			Error: err.Error(),
+		}
+		if err := zkp.SendMessage(conn, authResponse); err != nil {
+			// log the error and continue
+			fmt.Println(err.Error())
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (s *Server) authenticate(connection net.Conn, user zkp.UUID, authRequest *zkp.Commits) error {
@@ -44,7 +58,7 @@ func (s *Server) authenticate(connection net.Conn, user zkp.UUID, authRequest *z
 		return err
 	}
 	challengeResponse := &zkp_pb.ChallengeResponse{
-		Challenge: (*big.Int)(challenge).Bytes(),
+		Challenge: (challenge).Bytes(),
 	}
 	if err := zkp.SendMessage(connection, challengeResponse); err != nil {
 		return err

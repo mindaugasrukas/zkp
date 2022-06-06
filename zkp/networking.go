@@ -18,8 +18,8 @@ import (
 //
 // todo: add a full application packet header: version, size, type, etc.
 func ReadPacket(conn net.Conn) ([]byte, error) {
-	var size int
-	in := make([]byte, 0, 10240)
+	var psize, size int
+	in := make([]byte, 0)
 	tmp := make([]byte, 4096)
 	for {
 		n, err := conn.Read(tmp)
@@ -32,7 +32,8 @@ func ReadPacket(conn net.Conn) ([]byte, error) {
 
 		// calculate expected content size
 		if n >= 4 && size == 0 {
-			size = int(binary.LittleEndian.Uint32(tmp[:4]))
+			psize = int(binary.LittleEndian.Uint32(tmp[:4]))
+			size = psize
 			n -= 4
 			tmp = tmp[4:]
 		}
@@ -41,12 +42,11 @@ func ReadPacket(conn net.Conn) ([]byte, error) {
 
 		size -= n
 		// check if we received everything
-		if size == 0 {
+		if size <= 0 {
 			break
 		}
 	}
-
-	return in, nil
+	return in[:psize], nil
 }
 
 // ReadMessage reads and parses the bytes from the TCP connection into proto Message
