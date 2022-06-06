@@ -5,6 +5,24 @@ https://crypto.stackexchange.com/questions/99262/chaum-pedersen-protocol
 
 ## Development
 
+### Directory Layout
+
+    client - sample client application 
+        app - client application
+        cmd - CLI commands
+        docker - docker configuration
+        
+    server - sample server application
+        app - server application
+        docker - docker configuration
+
+    store - pluggable sample server storage
+
+    zkp - ZKP protocol
+        algorithm - ZKP algorithms
+        pedersen - Chaum-Pedersen Protocol
+        proto - protobuf messages
+
 ### Generate dependencies
 
 ```shell
