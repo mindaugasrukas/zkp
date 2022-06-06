@@ -8,18 +8,18 @@ https://crypto.stackexchange.com/questions/99262/chaum-pedersen-protocol
 ### Generate dependencies
 
 ```shell
-$ protoc --go_out=./zkp ./zkp/proto/*.proto
+$ make proto
 ```
 
 ### Test
 
 ```shell
-$ go test ./...
+$ make test
 ```
 
 ### Build
 
 ```shell
-$ go build -o=./build/server ./server/...
-$ go build -o=./build/client ./client/main.go
+$ make server
+$ make client
 ```
