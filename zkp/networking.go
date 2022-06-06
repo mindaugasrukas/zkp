@@ -64,12 +64,18 @@ func ReadMessage(conn net.Conn) (proto.Message, error) {
 	var msg proto.Message
 
 	switch envelope.Name {
-	case "RegisterRequest": msg = &zkp_pb.RegisterRequest{}
-	case "RegisterResponse": msg = &zkp_pb.RegisterResponse{}
-	case "AuthRequest": msg = &zkp_pb.AuthRequest{}
-	case "AuthResponse": msg = &zkp_pb.AuthResponse{}
-	case "AnswerRequest": msg = &zkp_pb.AnswerRequest{}
-	case "ChallengeResponse": msg = &zkp_pb.ChallengeResponse{}
+	case "RegisterRequest":
+		msg = &zkp_pb.RegisterRequest{}
+	case "RegisterResponse":
+		msg = &zkp_pb.RegisterResponse{}
+	case "AuthRequest":
+		msg = &zkp_pb.AuthRequest{}
+	case "AuthResponse":
+		msg = &zkp_pb.AuthResponse{}
+	case "AnswerRequest":
+		msg = &zkp_pb.AnswerRequest{}
+	case "ChallengeResponse":
+		msg = &zkp_pb.ChallengeResponse{}
 	}
 
 	if err = envelope.Message.UnmarshalTo(msg); err != nil {
@@ -84,8 +90,8 @@ func SendMessage(conn net.Conn, message proto.Message) error {
 	// Envelope Messages
 	any, err := anypb.New(message)
 	envelope := &zkp_pb.EnvelopeMessage{
-		Name: string(message.ProtoReflect().Descriptor().Name()),
-		Message:  any,
+		Name:    string(message.ProtoReflect().Descriptor().Name()),
+		Message: any,
 	}
 
 	out, err := proto.Marshal(envelope)

@@ -33,7 +33,7 @@ func (s *Server) serveAuth(conn net.Conn, authRequest *zkp_pb.AuthRequest) error
 		// send error response
 		authResponse := &zkp_pb.AuthResponse{
 			Result: false,
-			Error: err.Error(),
+			Error:  err.Error(),
 		}
 		if err := zkp.SendMessage(conn, authResponse); err != nil {
 			// log the error and continue
@@ -90,4 +90,3 @@ func (s *Server) authenticate(connection net.Conn, user zkp.UUID, authRequest *z
 
 	return nil
 }
-

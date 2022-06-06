@@ -13,7 +13,7 @@ import (
 
 var (
 	UnknownResponseError = errors.New("unknown response")
-	WrongResponseError = errors.New("wrong response")
+	WrongResponseError   = errors.New("wrong response")
 )
 
 type (

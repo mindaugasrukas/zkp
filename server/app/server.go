@@ -51,7 +51,7 @@ func NewServer() *Server {
 
 // Run starts the server
 func (s *Server) Run(port string) {
-	l, err := net.Listen("tcp", ":" + port)
+	l, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		// Can't start - panic
 		panic(err.Error())

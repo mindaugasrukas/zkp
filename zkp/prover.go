@@ -17,7 +17,7 @@ type (
 func NewProver(password int64) *PedersenProver {
 	q := big.NewInt(Q)
 	private := &algorithm.Zr{
-		Value: big.NewInt(password),
+		Value:  big.NewInt(password),
 		Modulo: q,
 	}
 	return &PedersenProver{

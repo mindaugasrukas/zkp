@@ -14,10 +14,10 @@ import (
 
 // Prover proves the knowledge of (x, r) such that z = (g**x) * (h**r).
 type Prover struct {
-	P *big.Int  // Zp as Group
-	Q *big.Int  // G's order
-	G *big.Int  // Group generator g
-	H *big.Int  // Group generator h
+	P *big.Int      // Zp as Group
+	Q *big.Int      // G's order
+	G *big.Int      // Group generator g
+	H *big.Int      // Group generator h
 	X *algorithm.Zr // Private x
 	R *algorithm.Zr // Private r
 }
@@ -28,9 +28,9 @@ type Verifier struct {
 	G *big.Int // Group generator g
 	H *big.Int // Group generator h
 	// public commitments
-	Y1 *big.Int	// y1 = (g**x)
+	Y1 *big.Int // y1 = (g**x)
 	Y2 *big.Int // y2 = (h**r)
-	Z *big.Int  // z = (g**x) * (h**r) = y1 * y2
+	Z  *big.Int // z = (g**x) * (h**r) = y1 * y2
 }
 
 func Hash(q *big.Int, values ...*big.Int) *big.Int {
