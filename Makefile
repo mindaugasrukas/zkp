@@ -26,6 +26,10 @@ clean:
 test: all
 	go test ./...
 
+.PHONY: coverage
+coverage: all
+	go test -cover ./...
+
 .PHONY: server-image
 server-image: server
 	docker build -t "zkp-server:$(SERVER-VERSION)" -f "server/docker/Dockerfile" $(WORKSPACE)

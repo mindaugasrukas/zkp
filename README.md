@@ -35,6 +35,11 @@ $ make proto
 $ make test
 ```
 
+Get the coverage
+```shell
+$ make coverage
+```
+
 ### Build OS native application
 
 ```shell
