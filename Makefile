@@ -15,7 +15,7 @@ client: proto
 
 .PHONY: server
 server: proto
-	go build -o=./build/server ./server/...
+	go build -o=./build/server ./server/main.go
 
 .PHONY: clean
 clean:
