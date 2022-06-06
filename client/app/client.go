@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math/big"
@@ -10,9 +11,24 @@ import (
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 )
 
-type Client struct {
-	serverAddr string
-}
+var (
+	UnknownResponseError = errors.New("unknown response")
+	WrongResponseError = errors.New("wrong response")
+)
+
+type (
+	// Prover interface
+	Prover interface {
+		CreateAuthenticationCommits() (*zkp.Commits, error)
+		ProveAuthentication(challenge *big.Int) (answer *big.Int)
+	}
+
+	Client struct {
+		serverAddr string
+		// Pluggable ZKP prover
+		prover Prover
+	}
+)
 
 func NewClient(serverAddr string) *Client {
 	return &Client{
@@ -54,24 +70,15 @@ func (c *Client) Register(user string, password int) error {
 		return err
 	}
 
-	// wait for response
-	msg, err := zkp.ReadMessage(conn)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return err
-	}
-	registerResponse, ok := msg.(*zkp_pb.RegisterResponse)
-	if !ok {
-		fmt.Println("Error: wrong registration response")
-		return err
-	}
+	return c.ProcessResponse(conn)
+}
 
+func (c *Client) ProcessRegistrationResults(registerResponse *zkp_pb.RegisterResponse) error {
 	if registerResponse.Result {
 		fmt.Println("Registration successful")
 	} else {
 		fmt.Printf("Error: %s\n", registerResponse.Error)
 	}
-
 	return nil
 }
 
@@ -84,9 +91,8 @@ func (c *Client) Login(user string, password int) error {
 	}
 	defer conn.Close()
 
-
-	prover := zkp.NewProver(int64(password))
-	request, err := prover.CreateAuthenticationCommits()
+	c.prover = zkp.NewProver(int64(password))
+	request, err := c.prover.CreateAuthenticationCommits()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		return err
@@ -109,23 +115,15 @@ func (c *Client) Login(user string, password int) error {
 		return err
 	}
 
-	// wait for response
-	msg, err := zkp.ReadMessage(conn)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return err
-	}
-	challengeResponse, ok := msg.(*zkp_pb.ChallengeResponse)
-	if !ok {
-		fmt.Println("Error: wrong auth response")
-		return err
-	}
+	return c.ProcessResponse(conn)
+}
 
+func (c *Client) ProcessChallenge(conn net.Conn, challengeResponse *zkp_pb.ChallengeResponse) error {
 	// construct answer request
 	var challenge big.Int
 	challenge.SetBytes(challengeResponse.GetChallenge())
 	log.Print("challenge = ", &challenge)
-	answer := prover.ProveAuthentication(&challenge)
+	answer := c.prover.ProveAuthentication(&challenge)
 	log.Print("answer = ", answer)
 	answerRequest := &zkp_pb.AnswerRequest{
 		Answer: (*big.Int)(answer).Bytes(),
@@ -137,18 +135,10 @@ func (c *Client) Login(user string, password int) error {
 		return err
 	}
 
-	// wait for response
-	msg, err = zkp.ReadMessage(conn)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return err
-	}
-	authResponse, ok := msg.(*zkp_pb.AuthResponse)
-	if !ok {
-		fmt.Println("Error: wrong auth response")
-		return err
-	}
+	return c.ProcessResponse(conn)
+}
 
+func (c *Client) ProcessAuthResults(authResponse *zkp_pb.AuthResponse) error {
 	if authResponse.Result {
 		fmt.Println("Login successful")
 		for {
@@ -163,4 +153,36 @@ func (c *Client) Login(user string, password int) error {
 	}
 
 	return nil
+}
+
+// ProcessResponse will wait and process server response
+func (c *Client) ProcessResponse(conn net.Conn) error {
+	msg, err := zkp.ReadMessage(conn)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return err
+	}
+
+	switch string(msg.ProtoReflect().Descriptor().Name()) {
+	case "RegisterResponse":
+		registerResponse, ok := msg.(*zkp_pb.RegisterResponse)
+		if !ok {
+			return WrongResponseError
+		}
+		return c.ProcessRegistrationResults(registerResponse)
+	case "ChallengeResponse":
+		challengeResponse, ok := msg.(*zkp_pb.ChallengeResponse)
+		if !ok {
+			return WrongResponseError
+		}
+		return c.ProcessChallenge(conn, challengeResponse)
+	case "AuthResponse":
+		authResponse, ok := msg.(*zkp_pb.AuthResponse)
+		if !ok {
+			return WrongResponseError
+		}
+		return c.ProcessAuthResults(authResponse)
+	}
+
+	return UnknownResponseError
 }
