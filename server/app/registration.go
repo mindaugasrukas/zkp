@@ -2,10 +2,9 @@ package app
 
 import (
 	"fmt"
-	"log"
-	"math/big"
 	"net"
 
+	"github.com/mindaugasrukas/zkp_example/server/model"
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 )
@@ -16,18 +15,7 @@ func (s *Server) serveRegistration(conn net.Conn, registerRequest *zkp_pb.Regist
 		return WrongRequestError
 	}
 
-	c := registerRequest.GetCommits()[0]
-
-	var y1, y2 big.Int
-	y1.SetBytes(c.GetY1())
-	y2.SetBytes(c.GetY2())
-	log.Printf("y1=%v, y2=%v", &y1, &y2)
-
-	commits := &zkp.Commits{
-		C1: &y1,
-		C2: &y2,
-	}
-	user := zkp.UUID(registerRequest.GetUser())
+	user, commits := model.GetRegistration(registerRequest)
 	response := &zkp_pb.RegisterResponse{Result: true}
 
 	if err := s.Register(user, commits); err != nil {

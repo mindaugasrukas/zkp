@@ -18,6 +18,7 @@ https://crypto.stackexchange.com/questions/99262/chaum-pedersen-protocol
     server - sample server application
         app - server application
         docker - docker configuration
+        model - translate communication messages to internal business logic types
 
     store - pluggable sample server storage
 

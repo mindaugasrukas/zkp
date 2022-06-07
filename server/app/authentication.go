@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/big"
 	"net"
 
+	"github.com/mindaugasrukas/zkp_example/server/model"
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 )
@@ -17,19 +17,8 @@ func (s *Server) serveAuth(conn net.Conn, authRequest *zkp_pb.AuthRequest) error
 		return WrongRequestError
 	}
 
-	c := authRequest.GetCommits()[0]
-
-	var r1, r2 big.Int
-	r1.SetBytes(c.GetR1())
-	r2.SetBytes(c.GetR2())
-
-	user := zkp.UUID(authRequest.GetUser())
-	auth := zkp.Commits{
-		C1: &r1,
-		C2: &r2,
-	}
-	log.Printf("r1=%v, r2=%v", &r1, &r2)
-	if err := s.authenticate(conn, user, &auth); err != nil {
+	user, auth := model.GetAuthentication(authRequest)
+	if err := s.authenticate(conn, user, auth); err != nil {
 		// send error response
 		authResponse := &zkp_pb.AuthResponse{
 			Result: false,
@@ -74,11 +63,10 @@ func (s *Server) authenticate(connection net.Conn, user zkp.UUID, authRequest *z
 		return errors.New("wrong auth answer")
 	}
 
-	var answer big.Int
-	answer.SetBytes(answerRequest.GetAnswer())
+	answer := model.GetAnswer(answerRequest)
 	log.Print("answer = ", &answer)
 
-	result := s.Verifier.VerifyAuthentication(userCommits, authRequest, challenge, &answer)
+	result := s.Verifier.VerifyAuthentication(userCommits, authRequest, challenge, answer)
 
 	// Send authentication results
 	authResponse := &zkp_pb.AuthResponse{
