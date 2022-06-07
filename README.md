@@ -61,8 +61,13 @@ Run server with default setting
 $ make server-run
 ```
 
-Run client docker container and accessing server container
+Run client docker container and accessing server container:
 ```shell
 $ docker run -it --rm "zkp-client:0.1" register -s host.docker.internal:8080 -u user-id -p 123
 $ docker run -it --rm "zkp-client:0.1" login -s host.docker.internal:8080 -u user-id -p 123
+```
+
+Run server using docker-compose:
+```shell
+$ docker-compose -f server/docker/docker-compose.yml up
 ```
