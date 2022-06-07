@@ -3,6 +3,8 @@
 Proof of concept implementation of ZKP protocol.
 Many implementation details are naive and don't represent production readiness.
 
+ZKP protocol and other explanation: https://www.cs.umd.edu/~waa/414-F11/IntroToCrypto.pdf
+
 Good explanation of Chaum-Pedersen Protocol
 https://crypto.stackexchange.com/questions/99262/chaum-pedersen-protocol
 
@@ -84,6 +86,5 @@ $ docker-compose -f server/docker/docker-compose.yml up
 * AWS code deploy
 * Functional/integration tests
 * Todos
-* Documentation
 * Review and cleanup ZKP protocol
 * Compute real ZKP values of P,G,H,Q
