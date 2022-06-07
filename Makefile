@@ -23,11 +23,11 @@ clean:
 	rm -rf ./zkp/gen
 
 .PHONY: test
-test: all
+test: proto
 	go test ./...
 
 .PHONY: coverage
-coverage: all
+coverage: proto
 	go test -cover ./...
 
 .PHONY: server-image
