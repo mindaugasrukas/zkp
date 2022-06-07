@@ -17,7 +17,6 @@ func TestCreateRegisterCommits(t *testing.T) {
 	assert.Equal(int64(12), commits.C2.Int64())
 }
 
-
 func TestCreateAuthenticationCommits(t *testing.T) {
 	assert := assert.New(t)
 	prover := zkp.NewProver(123)

@@ -13,47 +13,46 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-
 func TestReadPacket(t *testing.T) {
 	assert := assert.New(t)
 
-	tests := map[string]struct{
-		input string
+	tests := map[string]struct {
+		input        string
 		expectedSize int
 		expectedType string
 	}{
 		"RegisterRequest packet": {
-			input: "register_request_packet.bin",
+			input:        "register_request_packet.bin",
 			expectedSize: 78,
 			expectedType: "RegisterRequest",
 		},
 		"RegisterResponse packet": {
-			input: "register_response_packet.bin",
+			input:        "register_response_packet.bin",
 			expectedSize: 69,
 			expectedType: "RegisterResponse",
 		},
 		"RegisterResponse-error packet": {
-			input: "register_response_packet-user_exists_error.bin",
+			input:        "register_response_packet-user_exists_error.bin",
 			expectedSize: 88,
 			expectedType: "RegisterResponse",
 		},
 		"AuthRequest packet": {
-			input: "auth_request_packet.bin",
+			input:        "auth_request_packet.bin",
 			expectedSize: 70,
 			expectedType: "AuthRequest",
 		},
 		"ChallengeResponse packet": {
-			input: "challenge_response_packet.bin",
+			input:        "challenge_response_packet.bin",
 			expectedSize: 72,
 			expectedType: "ChallengeResponse",
 		},
 		"AnswerRequest packet": {
-			input: "answer_request_packet.bin",
+			input:        "answer_request_packet.bin",
 			expectedSize: 64,
 			expectedType: "AnswerRequest",
 		},
 		"AuthResponse packet": {
-			input: "auth_response_packet.bin",
+			input:        "auth_response_packet.bin",
 			expectedSize: 61,
 			expectedType: "AuthResponse",
 		},
@@ -88,8 +87,8 @@ func TestReadPacket(t *testing.T) {
 func TestReadMessage(t *testing.T) {
 	assert := assert.New(t)
 
-	tests := map[string]struct{
-		input string
+	tests := map[string]struct {
+		input        string
 		expectedType proto.Message
 	}{
 		"RegisterRequest packet": {
@@ -114,7 +113,7 @@ func TestReadMessage(t *testing.T) {
 			input: "register_response_packet-user_exists_error.bin",
 			expectedType: &zkp_pb.RegisterResponse{
 				Result: false,
-				Error: "user already exists",
+				Error:  "user already exists",
 			},
 		},
 		"AuthRequest packet": {
@@ -174,7 +173,7 @@ func TestReadMessage(t *testing.T) {
 func TestSendMessage(t *testing.T) {
 	assert := assert.New(t)
 
-	tests := map[string]struct{
+	tests := map[string]struct {
 		message     proto.Message
 		expectedBin string
 	}{
@@ -200,7 +199,7 @@ func TestSendMessage(t *testing.T) {
 			expectedBin: "register_response_packet-user_exists_error.bin",
 			message: &zkp_pb.RegisterResponse{
 				Result: false,
-				Error: "user already exists",
+				Error:  "user already exists",
 			},
 		},
 		"AuthRequest packet": {
