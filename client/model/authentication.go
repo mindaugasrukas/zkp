@@ -12,4 +12,3 @@ func GetChallenge(challengeResponse *zkp_pb.ChallengeResponse) *big.Int {
 	challenge.SetBytes(challengeResponse.GetChallenge())
 	return &challenge
 }
-
