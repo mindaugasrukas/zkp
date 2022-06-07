@@ -4,9 +4,9 @@ package zkp_pb;
 import "google/protobuf/any.proto";
 
 message EnvelopeMessage {
-    // The message name
+    // The message type
     string name = 1;
 
-    // The message and its type, encoded as an Any message.
+    // The message encoded as Any message.
     google.protobuf.Any message = 2;
 }

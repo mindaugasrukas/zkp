@@ -80,6 +80,7 @@ func (s *Server) Run(port string) {
 	}
 }
 
+// server accepted connection
 func (s *Server) serve(conn net.Conn) error {
 	msg, err := zkp.ReadMessage(conn)
 	if err != nil {

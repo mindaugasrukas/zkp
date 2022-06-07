@@ -14,6 +14,7 @@ type (
 	}
 )
 
+// NewProver returns a new prover instance
 func NewProver(password int64) *PedersenProver {
 	q := big.NewInt(Q)
 	private := &algorithm.Zr{
@@ -32,8 +33,8 @@ func NewProver(password int64) *PedersenProver {
 	}
 }
 
-// CreateRegisterCommits Creates the commits to register the user in the server
-// Having secret x and public keys g and h,
+// CreateRegisterCommits Creates the commits to register the user in the server.
+// Algorithm: having secret x and public keys g and h,
 // calculate y1 = g^x and y2 = h^x
 func (p *PedersenProver) CreateRegisterCommits() (*Commits, error) {
 	y1 := big.NewInt(0)
@@ -52,9 +53,9 @@ func (p *PedersenProver) CreateRegisterCommits() (*Commits, error) {
 	}, nil
 }
 
-// CreateAuthenticationCommits Creates an authentication request to start the authentication against the Server
-// Generate random k and using public keys g and h,
-// calculate r1 = g^k and r2 = h^k
+// CreateAuthenticationCommits Creates an authentication request to start the authentication against the Server.
+// Algorithm: generate random k and using public keys g and h,
+// and calculate r1 = g^k and r2 = h^k
 func (p *PedersenProver) CreateAuthenticationCommits() (*Commits, error) {
 	r1, r2, err := p.Commits()
 	if err != nil {
@@ -68,7 +69,7 @@ func (p *PedersenProver) CreateAuthenticationCommits() (*Commits, error) {
 }
 
 // ProveAuthentication Returns the answer to the challenge
-// Having secret x and random k
+// Algorithm: having secret x and random k
 // given challenge c and using public q
 // calculate the answer s = k - c * x (mod q)
 func (p *PedersenProver) ProveAuthentication(challenge *big.Int) (answer *big.Int) {

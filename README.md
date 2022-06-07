@@ -1,5 +1,8 @@
 # ZKP PoC
 
+Proof of concept implementation of ZKP protocol.
+Many implementation details are naive and don't represent production readiness.
+
 Good explanation of Chaum-Pedersen Protocol
 https://crypto.stackexchange.com/questions/99262/chaum-pedersen-protocol
 

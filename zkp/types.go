@@ -3,6 +3,7 @@ package zkp
 import "math/big"
 
 // Public information
+// todo: compute real world values
 const (
 	P = 23
 	G = 4

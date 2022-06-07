@@ -19,6 +19,7 @@ type (
 	}
 )
 
+// NewVerifier returns a new instance of verifier
 func NewVerifier() *PedersenVerifier {
 	return &PedersenVerifier{
 		Verifier: pedersen.Verifier{
@@ -44,7 +45,7 @@ func (v *PedersenVerifier) CreateAuthenticationChallenge() (challenge *big.Int, 
 }
 
 // VerifyAuthentication verifies the answer received from the client against the commits
-// Verify the answer s using this formula:
+// Verify the answer s using this algorithm:
 // g and h is public keys
 // c is the challenge
 // y1, y2 is client registered commits

@@ -11,10 +11,14 @@ import (
 )
 
 // ReadPacket reads message bytes from the TCP connection
+//
 // Packet structure:
 // 4 bytes    | N bytes
 // -----------+--------------------------------
 // the size N | message content of the length N
+//
+// This is required as we reuse the same TCP connection during the communication process.
+// At least we need to know the packet size to decode correctly.
 //
 // todo: add a full application packet header: version, size, type, etc.
 func ReadPacket(conn net.Conn) ([]byte, error) {
@@ -50,6 +54,7 @@ func ReadPacket(conn net.Conn) ([]byte, error) {
 }
 
 // ReadMessage reads and parses the bytes from the TCP connection into proto Message
+// Decode proto messages using envelope information.
 func ReadMessage(conn net.Conn) (proto.Message, error) {
 	in, err := ReadPacket(conn)
 	if err != nil {
@@ -86,6 +91,7 @@ func ReadMessage(conn net.Conn) (proto.Message, error) {
 
 // SendMessage writes the proto Message to the TCP connection
 // for packet structure see ReadPacket
+// Envelope the proto messages for easier to decode them.
 func SendMessage(conn net.Conn, message proto.Message) error {
 	// Envelope Messages
 	any, err := anypb.New(message)
