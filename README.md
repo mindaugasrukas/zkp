@@ -71,3 +71,14 @@ Run server using docker-compose:
 ```shell
 $ docker-compose -f server/docker/docker-compose.yml up
 ```
+
+## Todo
+
+* Logging
+* Command/event handler
+* AWS code deploy
+* Functional/integration tests
+* Todos
+* Documentation
+* Review and cleanup ZKP protocol
+* Compute real ZKP values of P,G,H,Q
