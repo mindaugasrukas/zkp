@@ -81,7 +81,6 @@ $ docker-compose -f server/docker/docker-compose.yml up
 
 ## Todo
 
-* Logging
 * Command/event handler
 * AWS code deploy
 * Functional/integration tests

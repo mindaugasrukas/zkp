@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,6 +17,12 @@ var (
 		CompletionOptions: cobra.CompletionOptions{
 			HiddenDefaultCmd: true,
 		},
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if !viper.GetBool("verbose") {
+				// disable logging
+				log.SetOutput(ioutil.Discard)
+			}
+		},
 	}
 )
 
@@ -24,6 +32,8 @@ func init() {
 	flags.StringP("server", "s", viper.GetString("SERVER"), "server URL (env: SERVER)")
 	viper.BindPFlag("server", flags.Lookup("server"))
 	// todo: set required field and validate input
+	flags.BoolP("verbose", "v", false, "verbose mode")
+	viper.BindPFlag("verbose", flags.Lookup("verbose"))
 }
 
 func Execute() {
