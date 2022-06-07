@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net"
 
+	"github.com/mindaugasrukas/zkp_example/client/model"
 	"github.com/mindaugasrukas/zkp_example/zkp"
 	"github.com/mindaugasrukas/zkp_example/zkp/gen/zkp_pb"
 )
@@ -30,12 +31,14 @@ type (
 	}
 )
 
+// NewClient returns a new client instance
 func NewClient(serverAddr string) *Client {
 	return &Client{
 		serverAddr: serverAddr,
 	}
 }
 
+// Register user to the server
 func (c *Client) Register(user string, password int) error {
 	// connect to server
 	conn, err := net.Dial("tcp", c.serverAddr)
@@ -73,6 +76,7 @@ func (c *Client) Register(user string, password int) error {
 	return c.ProcessResponse(conn)
 }
 
+// ProcessRegistrationResults ...
 func (c *Client) ProcessRegistrationResults(registerResponse *zkp_pb.RegisterResponse) error {
 	if registerResponse.Result {
 		fmt.Println("Registration successful")
@@ -82,6 +86,7 @@ func (c *Client) ProcessRegistrationResults(registerResponse *zkp_pb.RegisterRes
 	return nil
 }
 
+// Login user against the server
 func (c *Client) Login(user string, password int) error {
 	// connect to server
 	conn, err := net.Dial("tcp", c.serverAddr)
@@ -118,15 +123,15 @@ func (c *Client) Login(user string, password int) error {
 	return c.ProcessResponse(conn)
 }
 
+// ProcessChallenge returns answer to the server
 func (c *Client) ProcessChallenge(conn net.Conn, challengeResponse *zkp_pb.ChallengeResponse) error {
 	// construct answer request
-	var challenge big.Int
-	challenge.SetBytes(challengeResponse.GetChallenge())
-	log.Print("challenge = ", &challenge)
-	answer := c.prover.ProveAuthentication(&challenge)
+	challenge := model.GetChallenge(challengeResponse)
+	log.Print("challenge = ", challenge)
+	answer := c.prover.ProveAuthentication(challenge)
 	log.Print("answer = ", answer)
 	answerRequest := &zkp_pb.AnswerRequest{
-		Answer: (*big.Int)(answer).Bytes(),
+		Answer: (answer).Bytes(),
 	}
 
 	// send request
@@ -138,6 +143,7 @@ func (c *Client) ProcessChallenge(conn net.Conn, challengeResponse *zkp_pb.Chall
 	return c.ProcessResponse(conn)
 }
 
+// ProcessAuthResults ...
 func (c *Client) ProcessAuthResults(authResponse *zkp_pb.AuthResponse) error {
 	if authResponse.Result {
 		fmt.Println("Login successful")
@@ -156,6 +162,7 @@ func (c *Client) ProcessAuthResults(authResponse *zkp_pb.AuthResponse) error {
 }
 
 // ProcessResponse will wait and process server response
+// Very naive command processor
 func (c *Client) ProcessResponse(conn net.Conn) error {
 	msg, err := zkp.ReadMessage(conn)
 	if err != nil {
